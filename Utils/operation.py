@@ -13,15 +13,15 @@ def construct_knn_idx_list(points, k, dilated_list): # M, K, 3
     return knn_idx_list
 
 from pytorch3d.ops.sample_farthest_points import sample_farthest_points
-def SamplingAndQuery(batch_x, K, no_anchor=False, ratio=1.5):
+def SamplingAndQuery(batch_x, K, no_centrods=False, ratio=1.5):
     _, N, _ = batch_x.shape
     M = N*2//K
     # Sampling
-    if N < 10000 or no_anchor:
+    if N < 10000 or no_centrods:
         bones = sample_farthest_points(batch_x, K=M)[0] # (1, M, 3)
     else:
-        sample_anchor = batch_x.clone()[:, torch.randperm(N)[:M*16], :]
-        bones = sample_farthest_points(sample_anchor, K=M)[0] # (1, M, 3)
+        sample_centroids = batch_x.clone()[:, torch.randperm(N)[:M*16], :]
+        bones = sample_farthest_points(sample_centroids, K=M)[0] # (1, M, 3)
     # Query
     _, _, local_windows = knn_points(bones, batch_x, K=int(K*ratio), return_nn=True)
     bones, local_windows = bones[0], local_windows[0]

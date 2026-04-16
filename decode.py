@@ -73,13 +73,13 @@ parser.add_argument('--compressed_path', type=str, default='./data/compressed/')
 parser.add_argument('--decompressed_path', type=str, default='./data/decompressed/')
 parser.add_argument('--gpu_id', type=int, help='gpu_id', default=0)
 parser.add_argument('--datatype', type=str, help='semantickitti or ford', default="semantickitti")
-parser.add_argument('--use_oae', action="store_true", help="use oae for skeleton if true else gpcc")
+parser.add_argument('--use_oce', action="store_true", help="use oce for skeleton if true else gpcc")
 parser.add_argument('--window_size', type=int, help='window size.', default=16)
 parser.add_argument('--octree_depth', type=int, help='octree_depth.', default=12)
 args = parser.parse_args()
 
 torch.cuda.set_device(args.gpu_id)
-from skeleton_encoder import tmc_decompress, octformer_decode_backbone
+from skeleton_encoder import tmc_decompress, OCE_decode_backbone
 
 if args.datatype == "semantickitti":
     dilated_list = [1, 2, 4]
@@ -108,7 +108,7 @@ if not os.path.exists(decompressed_path):
 model = network_ECC.PointModel(channel=64, 
                             bottleneck_channel=16, dilated_list = dilated_list)
 model.load_state_dict(torch.load(model_load_path, map_location="cpu"))
-model = torch.compile(model)
+# model = torch.compile(model)
 model = model.cuda().eval()
 
 compressed_head_path_ls = list(glob(os.path.join(compressed_path, '*.h.bin')))
@@ -122,11 +122,11 @@ with torch.no_grad():
         filename_w_ext = os.path.split(compressed_head_path[:-6])[-1]
         compressed_head_path = os.path.join(compressed_path, filename_w_ext+'.h.bin')
         compressed_skin_path = os.path.join(compressed_path, filename_w_ext+'.s.bin')
-        if not args.use_oae:
+        if not args.use_oce:
             compressed_bone_path = os.path.join(compressed_path, filename_w_ext+'.b.bin')
             cache_file = compressed_path + "cache.ply"
 
-        if args.use_oae:
+        if args.use_oce:
             with open(compressed_head_path, 'rb') as fin:
                 local_window_size = np.frombuffer(fin.read(2), dtype=np.uint16)[0]
                 min_v_value = np.frombuffer(fin.read(2), dtype=np.int16)[0]
@@ -145,9 +145,9 @@ with torch.no_grad():
                 max_v_value = np.frombuffer(fin.read(2), dtype=np.int16)[0]
                 gpcc_input_scale = np.frombuffer(fin.read(8), dtype=np.float64)[0]
 
-        if args.use_oae:
+        if args.use_oce:
             timer.start_count("bone_dec")
-            rec_bones = octformer_decode_backbone(save_path=os.path.join(compressed_path, filename_w_ext), rec_octant=rec_octant,\
+            rec_bones = OCE_decode_backbone(save_path=os.path.join(compressed_path, filename_w_ext), rec_octant=rec_octant,\
                                                 rec_db_center0=rec_db_center0, rec_db_center1=rec_db_center1, rec_db_center2=rec_db_center2,\
                                                     rec_db_extent=rec_db_extent, min_=min_, max_=max_, depth=tree_depth, seq_size=512, batch_size=batch_size)
             rec_bones = torch.tensor(rec_bones, dtype=torch.float32).cuda()

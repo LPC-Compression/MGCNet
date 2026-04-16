@@ -1,5 +1,5 @@
 # DPCNet
-This is the official code for our paper "DPCNet: Dual-Path Compression Network with Multi-Scale Geometric Context for LiDAR Point Cloud."
+This is the official code for our paper "MGCNet: Point-based Geometric Codec with Multi-Scale Geometric Context for High-Ratio LiDAR Point Cloud Compression."
 
 ## Installation
 
@@ -35,11 +35,11 @@ chmod +x tmc3_v29
 
 
 
-python encode.py --input_globs ./data/SemanticKITTI/\*.ply --compressed_path ./data/SemanticKITTI/compress/ --datatype semantickitti --gpu_id 0 --K 32 --use_oae
+python encode.py --input_globs ./data/SemanticKITTI/\*.ply --compressed_path ./data/SemanticKITTI/compress/ --datatype semantickitti --gpu_id 0 --K 32 --use_oce
 
 
 
-python decode.py  --compressed_path ./data/SemanticKITTI/compress/ --decompressed_path ./data/SemanticKITTI/decompress/ --datatype semantickitti --gpu_id 0 --use_oae
+python decode.py  --compressed_path ./data/SemanticKITTI/compress/ --decompressed_path ./data/SemanticKITTI/decompress/ --datatype semantickitti --gpu_id 0 --use_oce
 
 
 
@@ -55,11 +55,11 @@ chmod +x tmc3_v29
 
 
 
-python encode.py --input_globs ./data/Ford/\*.ply --compressed_path ./data/Ford/compress/ --datatype ford --gpu_id 0 --K 64 --use_oae
+python encode.py --input_globs ./data/Ford/\*.ply --compressed_path ./data/Ford/compress/ --datatype ford --gpu_id 0 --K 64 --use_oce
 
 
 
-python decode.py  --compressed_path ./data/Ford/compress/ --decompressed_path ./data/Ford/decompress/ --datatype ford --gpu_id 0 --use_oae
+python decode.py  --compressed_path ./data/Ford/compress/ --decompressed_path ./data/Ford/decompress/ --datatype ford --gpu_id 0 --use_oce
 
 
 

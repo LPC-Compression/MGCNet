@@ -9,9 +9,9 @@ from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import subprocess
 
-best_octformer_model = torch.load('./models/kitti_best.pth').cuda()
-best_octformer_model.eval()
-best_octformer_model.to(torch.float64)
+best_OCE_model = torch.load('./model/best_OCE.pth').cuda()
+best_OCE_model.eval()
+best_OCE_model.to(torch.float64)
 
 # 节点，构成OCtree的基本元素
 class Octantids:
@@ -101,7 +101,7 @@ def encode(pdf, sym, binpath):
     byte_stream, real_bits = codec.encode(pdf, sym, binpath)
     return byte_stream, real_bits
 
-def octformer_encode_backbone(pc, save_path, depth=12, seq_size=512, batch_size=64):
+def OCE_encode_backbone(pc, save_path, depth=12, seq_size=512, batch_size=64):
     min_, max_ = np.amin(pc), np.amax(pc)
     norm_point_cloud = (pc - min_) / (max_ - min_)
     root, db_extent, db_center, node_count, rec_pc, data, label = octree_BFS_build(db_np=norm_point_cloud, depth=depth)
@@ -121,7 +121,7 @@ def octformer_encode_backbone(pc, save_path, depth=12, seq_size=512, batch_size=
     with torch.no_grad():
         for i, batch_data in enumerate(dataloader):
             batch_data = batch_data.cuda()
-            pred = best_octformer_model(batch_data) # B, S, D
+            pred = best_OCE_model(batch_data) # B, S, D
             pred = F.softmax(pred, dim=-1).reshape(-1, pred.shape[-1]).detach().cpu().numpy()
             pdflist.append(pred)
     pdflist=np.concatenate(pdflist, axis=0).astype(np.float32)
@@ -163,7 +163,7 @@ def decode(pdf, binpath):
     return np.array(result)
 
 
-def octformer_decode_backbone(save_path, rec_octant, rec_db_center0, rec_db_center1, rec_db_center2, \
+def OCE_decode_backbone(save_path, rec_octant, rec_db_center0, rec_db_center1, rec_db_center2, \
                               rec_db_extent, min_, max_,
                               depth=12, seq_size=512, batch_size=64):
     rec_root = Octantids([None for i in range(8)], np.array([rec_db_center0, rec_db_center1, rec_db_center2]), \
@@ -183,7 +183,7 @@ def octformer_decode_backbone(save_path, rec_octant, rec_db_center0, rec_db_cent
         with torch.no_grad():
             for _, batch_data in enumerate(dataloader):
                 batch_data = batch_data.cuda()
-                pred = best_octformer_model(batch_data) # B, S, D
+                pred = best_OCE_model(batch_data) # B, S, D
                 pred = F.softmax(pred, dim=-1).reshape(-1, pred.shape[-1]).detach().cpu().numpy()
                 result_pdf.append(pred)
         result_pdf=np.concatenate(result_pdf, axis=0)[0:len_rec_data].astype(np.float32)

@@ -75,13 +75,13 @@ parser.add_argument('--compressed_path', type=str, default='./data/compressed/')
 parser.add_argument('--datatype', type=str, help='semantickitti or ford', default="semantickitti")
 parser.add_argument('--gpu_id', type=int, help='gpu_id', default=0)
 parser.add_argument('--K', type=int, help='$K$.', default=32)
-parser.add_argument('--use_oae', action="store_true", help="use oae for skeleton if true else gpcc")
+parser.add_argument('--use_oce', action="store_true", help="use oce for skeleton if true else gpcc")
 parser.add_argument('--window_size', type=int, help='window size.', default=16)
 parser.add_argument('--octree_depth', type=int, help='octree_depth.', default=12)
 args = parser.parse_args()
 
 torch.cuda.set_device(args.gpu_id)
-from skeleton_encoder import octformer_encode_backbone, tmc_compress, tmc_decompress
+from skeleton_encoder import OCE_encode_backbone, tmc_compress, tmc_decompress
 
 if args.datatype == "semantickitti":
     dilated_list = [1, 2, 4]
@@ -111,7 +111,7 @@ if not os.path.exists(compressed_path):
 model = network_ECC.PointModel(channel=64, 
                             bottleneck_channel=16, dilated_list = dilated_list)
 model.load_state_dict(torch.load(model_load_path, map_location="cpu"))
-model = torch.compile(model)
+# model = torch.compile(model)
 model = model.cuda().eval()
 files = np.array(glob(input_globs, recursive=True))
 
@@ -129,18 +129,18 @@ with torch.no_grad():
         filename_w_ext = os.path.split(file_path)[-1]
         compressed_head_path = os.path.join(compressed_path, filename_w_ext+'.h.bin')
         compressed_skin_path = os.path.join(compressed_path, filename_w_ext+'.s.bin')
-        if not args.use_oae:
+        if not args.use_oce:
             compressed_bone_path = os.path.join(compressed_path, filename_w_ext+'.b.bin')
             cache_file = compressed_path + "cache.ply"
 
         timer.start_count("FPS+KNN")
-        bones, local_windows = operation.SamplingAndQuery(batch_x, local_window_size, no_anchor=True)
+        bones, local_windows = operation.SamplingAndQuery(batch_x, local_window_size, no_centrods=True)
         timer.end_count("FPS+KNN")
 
-        if args.use_oae:
+        if args.use_oce:
             timer.start_count("bone encode")
             bone_steam_size, rec_pc, root_octant, min_, max_, db_center, db_extent = \
-                    octformer_encode_backbone(bones.detach().cpu().numpy(), depth=tree_depth, \
+                    OCE_encode_backbone(bones.detach().cpu().numpy(), depth=tree_depth, \
                                             batch_size=batch_size, save_path=os.path.join(compressed_path, filename_w_ext))
             rec_bones = torch.tensor(rec_pc, dtype=torch.float32).cuda()
             timer.end_count("bone encode")
@@ -189,7 +189,7 @@ with torch.no_grad():
         )
         timer.end_count('Encoding')
         
-        if args.use_oae:
+        if args.use_oce:
             with open(compressed_head_path, 'wb') as fout:
                 fout.write(np.array(local_window_size, dtype=np.uint16).tobytes())
                 fout.write(np.array(min_v_value.item(), dtype=np.int16).tobytes())

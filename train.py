@@ -44,7 +44,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--datatype', type=str, help='semantickitti or ford', default="semantickitti")
 parser.add_argument('--gpu_id', type=int, help='gpu_id', default=0)
 parser.add_argument('--model_save_folder', type=str, help='Directory where to save trained models.', default=f'./model/ckpt_kitti.pt')
-parser.add_argument('--train_glob', type=str, help='Glob pattern to load point clouds.', default='./Ford_full/Ford_01_q_1mm/*.ply')
+parser.add_argument('--train_glob', type=str, help='Glob pattern to load point clouds.')
 parser.add_argument('--K', type=int, help='$K$.', default=32)
 parser.add_argument('--dilated_window_size', type=int, help='Dilated window size $k$.', default=8)
 parser.add_argument('--channel', type=int, help='Network channel.', default=64)
