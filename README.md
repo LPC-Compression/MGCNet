@@ -18,15 +18,15 @@ Please refer to the official [website of KITTI](https://www.cvlibs.net/datasets/
 
 You need to be a member of MPEG first. The Ford dataset is provided on their [website](https://mpegfs.int-evry.fr/mpegcontent/ws-mpegcontent/MPEG-I).
 
-## Train DPCNet
+## Train MGCNet
 python train.py --datatype semantickitti  --gpu_id 0 --model_save_folder ./model/kitti.pt --K 32 --train_glob ./datasets/SemanticKITTIDataset/
 
 
 
 python train.py --datatype ford  --gpu_id 0 --model_save_folder ./model/ford.pt --K 64 --train_glob ./datasets/Ford/Ford_full/Ford_01_q_1mm/\*.ply
 
-## Eval DPCNet
-### Eval DPCNet on SemanticKITTI
+## Eval MGCNet
+### Eval MGCNet on SemanticKITTI
 chmod +x pc_error
 
 
@@ -45,7 +45,7 @@ python decode.py  --compressed_path ./data/SemanticKITTI/compress/ --decompresse
 
 python eval_PSNR.py --input_globs ./data/SemanticKITTI/\*.ply --decompressed_path ./data/SemanticKITTI/decompress/ --datatype semantickitti
 
-### Eval DPCNet on Ford
+### Eval MGCNet on Ford
 
 chmod +x pc_error
 
@@ -65,8 +65,8 @@ python decode.py  --compressed_path ./data/Ford/compress/ --decompressed_path ./
 
 python eval_PSNR.py --input_globs ./data/Ford/\*.ply --decompressed_path ./data/Ford/decompress/ --datatype ford
 
-## Eval LightDPCNet
-### Eval LightDPCNet on SemanticKITTI
+## Eval LightMGCNet
+### Eval LightMGCNet on SemanticKITTI
 
 chmod +x pc_error
 
@@ -86,7 +86,7 @@ python decode.py  --compressed_path ./data/SemanticKITTI/compress/ --decompresse
 
 python eval_PSNR.py --input_globs ./data/SemanticKITTI/\*.ply --decompressed_path ./data/SemanticKITTI/decompress/ --datatype semantickitti
 
-### Eval LightDPCNet on Ford
+### Eval LightMGCNet on Ford
 
 chmod +x pc_error
 

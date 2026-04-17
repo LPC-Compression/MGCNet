@@ -1,4 +1,4 @@
-name: dpcnet
+name: mgcnet
 channels:
   - pytorch3d
   - pytorch
