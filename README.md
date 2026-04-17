@@ -1,4 +1,4 @@
-# DPCNet
+# MGCNet
 This is the official code for our paper "MGCNet: Point-based Geometric Codec with Multi-Scale Geometric Context for High-Ratio LiDAR Point Cloud Compression."
 
 ## Installation
