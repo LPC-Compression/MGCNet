@@ -1,5 +1,5 @@
 # MGCNet
-This is the official code for our paper "MGCNet: Point-based Codec with Multi-Scale Geometric Context for High-Ratio LiDAR PointCloud Compression."
+This is the official code for our paper "MGCNet: Point-based Codec with Multi-Scale Geometric Context for High-Ratio LiDAR Point Cloud Compression."
 
 ## Installation
 
